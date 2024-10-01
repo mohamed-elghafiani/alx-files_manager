@@ -1,8 +1,14 @@
+// server.js
 import express from 'express';
-import injectRoutes from './routes';
+import router from './routes/index.js';  // Make sure to import the router correctly
 
-const server = express();
+const app = express();
 
-injectRoutes(server);
+// Use the router for all routes
+app.use('/', router);
 
-export default server;
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
