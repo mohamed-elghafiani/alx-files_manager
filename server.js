@@ -1,6 +1,6 @@
 // server.js
 import express from 'express';
-import router from './routes/index.js';  // Make sure to import the router correctly
+import router from './routes/index';
 
 const app = express();
 

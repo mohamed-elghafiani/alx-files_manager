@@ -1,7 +1,6 @@
-import dbClient from '../utils/db.js';
-import redisClient from '../utils/redis.js';
 import crypto from 'crypto';
-
+import redisClient from '../utils/redis';
+import dbClient from '../utils/db';
 
 class UsersController {
   static async postNew(req, res) {
@@ -73,7 +72,6 @@ class UsersController {
     // Return the user object (email and id only)
     return res.status(200).json({ id: user._id, email: user.email });
   }
-
 }
 
 export default UsersController;
