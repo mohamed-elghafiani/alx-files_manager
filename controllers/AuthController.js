@@ -1,19 +1,32 @@
 // controllers/AuthController.js
 import { v4 as uuidv4 } from 'uuid';
-import redisClient from '../utils/redis.js';
-import dbClient from '../utils/db.js';
 import { createHash } from 'crypto';
+import redisClient from '../utils/redis';
+import dbClient from '../utils/db';
 
 class AuthController {
   static async getConnect(req, res) {
-    const authHeader = req.headers['authorization'];
+    const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Basic ')) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
     const token = authHeader.split(' ')[1];
-    const [email, password] = Buffer.from(token, 'base64').toString('utf-8').split(':');
+
+    // Add a try-catch block for Base64 decoding
+    let decoded;
+    try {
+      decoded = Buffer.from(token, 'base64').toString('utf-8');
+    } catch (err) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const [email, password] = decoded.split(':');
+
+    if (!email || !password) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
 
     const hashedPassword = createHash('sha1').update(password).digest('hex');
 
@@ -26,7 +39,8 @@ class AuthController {
     const tokenString = uuidv4();
     const key = `auth_${tokenString}`;
 
-    await redisClient.set(key, 24 * 60 * 60, user._id.toString());
+    await redisClient.set(key, user._id.toString());
+    await redisClient.expire(key, 24 * 60 * 60);
 
     return res.status(200).json({ token: tokenString });
   }
